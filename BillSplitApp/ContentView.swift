@@ -34,11 +34,11 @@ struct ContentView: View {
         NavigationStack {
             Form {
                 Section(header: Text("Bill Details")) {
-                    TextField("Enter bill amount", text: $billAmount)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .padding()
-                        .toolbar {
+                    HStack {
+                        Text("$")
+                        TextField("Enter bill amount", text: $billAmount)
+                            .keyboardType(.decimalPad)
+                            .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
                                     Spacer() // Flexble space before the button, pushes it to the right
                                     Button("Done") {
@@ -49,36 +49,47 @@ struct ContentView: View {
                                     }
                                 }
                             }
+                    }
+                    .padding(.vertical)
+                    
                     // The $billAmount here creates a binding effect to the @State so whenever
                     // a user inputs an amount it will update in the UI)'
                     Picker("Tip Type", selection: $tipPercentageUse) {
                         Text("Percentage").tag(true)
                         Text("Custom Amount").tag(false)
                     }
-                    .padding()
+                    .padding(.vertical)
                     
                     if tipPercentageUse {
                         HStack {
                             Text("Tip: \(Int(tipPercentage))%")
                             Slider(value: $tipPercentage, in: 0...30, step: 1)
                         }
-                        .padding()
+                        .padding(.vertical)
                     } else {
-                        TextField("Enter custom tip", text: $customTipAmount)
-                            .keyboardType(.decimalPad)
+                        HStack{
+                            Text("$")
+                            TextField("Enter custom tip", text: $customTipAmount)
+                                .keyboardType(.decimalPad)
+                        }
+                        .padding(.vertical)
                     }
                     
                     Stepper("Total number of people: \(numberOfPeople)", value: $numberOfPeople, in: 1...20)
+                        .padding(.vertical)
                     
                 }
-                Section(header: Text("Results")) {
+                Section(header: Text("Bill Total")) {
                     Text("Total: $\(total, specifier: "%.2f")")
+                        .padding(.vertical)
                     Text("Per Person: $\(perPerson, specifier: "%.2f")")
                         .font(.headline)
                         .foregroundColor(.blue)
+                        .padding(.vertical)
                 }
             }
-            .navigationTitle("Tip Calculator")
+            .navigationTitle("Bill Split Calculator")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
