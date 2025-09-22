@@ -5,9 +5,38 @@
 //  Created by Yuki Kuwahara on 9/15/25.
 //
 
+import Foundation
 import SwiftUI
 
+// This is the Main View
+
 struct ContentView: View {
+    @State private var selection = 0 // Default to 0 for equal split
+    
+    var body: some View {
+        NavigationStack{
+            Picker("Mode", selection: $selection) {
+                Text("Equal").tag(0)
+                Text("Detailed").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .padding()
+            .navigationTitle("Bill Split Application")
+            .navigationBarTitleDisplayMode(.inline)
+            
+            // Switch between views
+            if selection == 0 {
+                EqualView()
+            } else {
+                // DetailedView()
+            }
+        }
+    }
+}
+
+// Equal Split View
+
+struct EqualView: View {
     @State private var billAmount: String = ""
     @State private var tipPercentageUse: Bool = true
     @State private var tipPercentage: Double = 15
@@ -31,7 +60,6 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationStack {
             Form {
                 Section(header: Text("Bill Details")) {
                     HStack {
@@ -88,12 +116,30 @@ struct ContentView: View {
                         .padding(.vertical)
                 }
             }
-            .navigationTitle("Bill Split Calculator")
-            .navigationBarTitleDisplayMode(.inline)
         }
     }
+
+// Detailed Split View Structs
+
+struct Person: Identifiable {
+    let id = UUID()
+    var name: String
+    //var items: [Item]
 }
 
+struct Item: Identifiable {
+    let id: UUID
+    var name: String
+    var price: Double
+}
+
+// Detailed Split View
+
+//struct DetailedView(): View{
+//    var body: some View {
+//        
+//    }
+//}
 
 #Preview {
     ContentView()
