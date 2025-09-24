@@ -14,25 +14,21 @@ struct ContentView: View {
     @State private var selection = 0 // Default to 0 for equal split
     
     var body: some View {
-        NavigationStack{
-            Picker("Mode", selection: $selection) {
-                Text("Equal").tag(0)
-                Text("Detailed").tag(1)
+        Picker("Mode", selection: $selection) {
+            Text("Equal").tag(0)
+            Text("Detailed").tag(1)
             }
             .pickerStyle(.segmented)
             .padding()
-            .navigationTitle("Bill Split Application")
-            .navigationBarTitleDisplayMode(.inline)
-            
+
             // Switch between views
             if selection == 0 {
                 EqualView()
             } else {
-                // DetailedView()
+                DetailedView()
             }
-        }
     }
-}
+    }
 
 // Equal Split View
 
@@ -124,23 +120,76 @@ struct EqualView: View {
 struct Person: Identifiable {
     let id = UUID()
     var name: String
-    //var items: [Item]
-}
-
-struct Item: Identifiable {
-    let id: UUID
-    var name: String
-    var price: Double
+    var amounts: [Double]
 }
 
 // Detailed Split View
 
-//struct DetailedView(): View{
-//    var body: some View {
-//        
-//    }
-//}
-
+struct DetailedView : View {
+    @State private var people: [Person] = [] // starting empty
+    @State private var newPersonName: String = ""
+    @State private var newAmount = ""
+    
+    var body: some View {
+        Form {
+            // Adding People
+            Section(header: Text("Add Person")) {
+                HStack {
+                    TextField("Name", text: $newPersonName)
+                    Button(action: {
+                        guard !newPersonName.isEmpty else { return }
+                        let newPerson = Person(name: newPersonName, amounts: [])
+                        people.append(newPerson)
+                        newPersonName = ""
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            
+            // Person Section
+            ForEach(people.indices, id: \.self) { i in
+                Section(header: Text(people[i].name)) {
+                    HStack {
+                        TextField("Enter Amount", text: $newAmount)
+                            .keyboardType(.decimalPad)
+                        Button(action: {
+                            guard !newAmount.isEmpty else { return }
+                            if let value = Double(newAmount) {
+                                people[i].amounts.append(value)
+                                newAmount = ""
+                            }
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+                
+                // Amounts Section
+                ForEach(people[i].amounts.indices, id: \.self) { j in
+                    HStack {
+                        Text("Item \(j + 1)")
+                        Spacer()
+                        Text("$\(people[i].amounts[j], specifier: "%.2f")")
+                    }
+                    
+                }
+                
+                HStack {
+                    Text("Total").bold()
+                    Spacer()
+                    Text("$\(people[i].amounts.reduce(0,+), specifier: "%.2f")")
+                        .bold()
+                }
+                
+            }
+        }
+        }
+        
+    }
+    
 #Preview {
     ContentView()
 }
