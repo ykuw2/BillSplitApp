@@ -120,7 +120,12 @@ struct EqualView: View {
 struct Person: Identifiable {
     let id = UUID()
     var name: String
+    var amount : String = ""
     var amounts: [Double]
+    
+    var total: Double {
+        amounts.reduce(0, +)
+    }
 }
 
 // Detailed Split View
@@ -129,6 +134,42 @@ struct DetailedView : View {
     @State private var people: [Person] = [] // starting empty
     @State private var newPersonName: String = ""
     @State private var newAmount = ""
+    @State private var tipPercentageUse: Bool = true
+    @State private var tipPercentage: Double = 15
+    @State private var customTipAmount: String = ""
+    @State private var billAmount: String = ""
+    
+    var totalAmountPreTip: Double {
+        guard !people.isEmpty else { return 0.0 }
+        
+        var bill: Double {
+            people.reduce(0) { $0 + $1.total }
+        }
+        
+        return bill
+        
+    }
+    
+    var tipAmount: Double {
+        if tipPercentageUse {
+            return totalAmountPreTip * tipPercentage / 100
+        } else {
+            return Double(customTipAmount) ?? 0
+        }
+    }
+    
+    func tipShare(for person: Person) -> Double {
+        let total = totalAmountPreTip
+        guard total > 0 else { return 0.0 }
+        let ratio = person.total / total
+        
+        return ratio
+    }
+    
+    var totalAmount: Double {
+        return totalAmountPreTip + tipAmount
+    }
+    
     
     var body: some View {
         Form {
@@ -152,38 +193,64 @@ struct DetailedView : View {
             ForEach(people.indices, id: \.self) { i in
                 Section(header: Text(people[i].name)) {
                     HStack {
-                        TextField("Enter Amount", text: $newAmount)
+                        TextField("Enter Amount", text: $people[i].amount)
                             .keyboardType(.decimalPad)
                         Button(action: {
-                            guard !newAmount.isEmpty else { return }
-                            if let value = Double(newAmount) {
+                            guard !people[i].amount.isEmpty else { return }
+                            if let value = Double(people[i].amount) {
                                 people[i].amounts.append(value)
-                                newAmount = ""
+                                people[i].amount = ""
                             }
                         }) {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundColor(.blue)
                         }
                     }
+                    
+                    // Amounts Section
+                    ForEach(people[i].amounts.indices, id: \.self) { j in
+                        HStack {
+                            Text("Item \(j + 1)")
+                            Spacer()
+                            Text("$\(people[i].amounts[j], specifier: "%.2f")")
+                        }
+                        
+                    }.onDelete { offsets in
+                        people[i].amounts.remove(atOffsets: offsets)
+                    }
+                }
+                                
+            }
+            
+            Section(header: Text("Tip Amount")) {
+                Picker("Tip Type", selection: $tipPercentageUse) {
+                    Text("Percentage").tag(true)
+                    Text("Custom Amount").tag(false)
                 }
                 
-                // Amounts Section
-                ForEach(people[i].amounts.indices, id: \.self) { j in
+                if tipPercentageUse {
                     HStack {
-                        Text("Item \(j + 1)")
-                        Spacer()
-                        Text("$\(people[i].amounts[j], specifier: "%.2f")")
+                        Text("Tip: \(Int(tipPercentage))%")
+                        Slider(value: $tipPercentage, in: 0...30, step: 1)
                     }
+                } else {
+                    HStack{
+                        Text("$")
+                        TextField("Enter custom tip", text: $customTipAmount)
+                            .keyboardType(.decimalPad)
+                    }
+                }
+            }
+            
+            Section(header: Text("Bill Total and Splits")) {
+                Text("Total: $\(totalAmount, specifier:"%.2f")")
+                
+                ForEach(people.indices, id:\.self) { i in
+                    let tipRatio: Double = tipShare(for: people[i])
+                    let personSplit: Double = (tipAmount * tipRatio) + people[i].total
+                    Text("\(people[i].name): $\(personSplit, specifier: "%.2f")")
                     
                 }
-                
-                HStack {
-                    Text("Total").bold()
-                    Spacer()
-                    Text("$\(people[i].amounts.reduce(0,+), specifier: "%.2f")")
-                        .bold()
-                }
-                
             }
         }
         }
