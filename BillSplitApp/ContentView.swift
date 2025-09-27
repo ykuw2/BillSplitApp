@@ -34,22 +34,28 @@ struct ContentView: View {
 
 struct EqualView: View {
     @State private var billAmount: String = ""
+    @State private var taxAmount: String = ""
     @State private var tipPercentageUse: Bool = true
     @State private var tipPercentage: Double = 15
     @State private var customTipAmount: String = ""
     @State private var numberOfPeople: Int = 2
     
-    var total: Double {
-        let bill = Double(billAmount) ?? 0 // nil-coalescing (if nil use 0)
-        var tip: Double {
-            if tipPercentageUse {
-                return bill * (tipPercentage / 100)
-            } else {
-                return Double(customTipAmount) ?? 0
-            }
+
+    var tipAmount: Double {
+        let bill = Double(billAmount) ?? 0
+        let tax = Double(taxAmount) ?? 0
+        if tipPercentageUse {
+            return (bill - tax) * (tipPercentage / 100)
+        } else {
+            return Double(customTipAmount) ?? 0
         }
-        return bill + tip
     }
+    
+    var total: Double {
+        let bill = Double(billAmount) ?? 0
+        return bill + tipAmount
+    }
+    
     
     var perPerson: Double {
         total / Double(numberOfPeople) // Double here since type-safe
@@ -59,8 +65,25 @@ struct EqualView: View {
             Form {
                 Section(header: Text("Bill Details")) {
                     HStack {
-                        Text("$")
-                        TextField("Enter bill amount", text: $billAmount)
+                        Text("Total: $")
+                        TextField("Enter total bill amount", text: $billAmount)
+                            .keyboardType(.decimalPad)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                    Spacer() // Flexble space before the button, pushes it to the right
+                                    Button("Done") {
+                                        UIApplication.shared.sendAction( // Sending the action to the UI
+                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                            to: nil, from: nil, for: nil // Send to any object that can respond
+                                        )
+                                    }
+                                }
+                            }
+                    }.padding(.vertical)
+                    
+                    HStack {
+                        Text("Tax: $")
+                        TextField("Enter tax amount", text: $taxAmount)
                             .keyboardType(.decimalPad)
                             .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
@@ -85,16 +108,32 @@ struct EqualView: View {
                     .padding(.vertical)
                     
                     if tipPercentageUse {
-                        HStack {
-                            Text("Tip: \(Int(tipPercentage))%")
-                            Slider(value: $tipPercentage, in: 0...30, step: 1)
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text("Tip: \(Int(tipPercentage))%")
+                                Slider(value: $tipPercentage, in: 0...30, step: 1)
+                            }
+                            Text("Tip Amount: $\(tipAmount, specifier: "%.2f")")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
                         }
                         .padding(.vertical)
                     } else {
                         HStack{
-                            Text("$")
+                            Text("Tip: $")
                             TextField("Enter custom tip", text: $customTipAmount)
                                 .keyboardType(.decimalPad)
+                                .toolbar {
+                                    ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                        Spacer() // Flexble space before the button, pushes it to the right
+                                        Button("Done") {
+                                            UIApplication.shared.sendAction( // Sending the action to the UI
+                                                #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                                to: nil, from: nil, for: nil // Send to any object that can respond
+                                            )
+                                        }
+                                    }
+                                }
                         }
                         .padding(.vertical)
                     }
@@ -112,6 +151,7 @@ struct EqualView: View {
                         .padding(.vertical)
                 }
             }
+            .scrollDisabled(true)
         }
     }
 
@@ -132,27 +172,24 @@ struct Person: Identifiable {
 
 struct DetailedView : View {
     @State private var people: [Person] = [] // starting empty
+    @State private var miscAmount: String = ""
+    @State private var miscAmounts: [Double] = []
     @State private var newPersonName: String = ""
     @State private var newAmount = ""
     @State private var tipPercentageUse: Bool = true
     @State private var tipPercentage: Double = 15
     @State private var customTipAmount: String = ""
     @State private var billAmount: String = ""
+    @State private var taxAmount: String = ""
     
     var totalAmountPreTip: Double {
-        guard !people.isEmpty else { return 0.0 }
-        
-        var bill: Double {
-            people.reduce(0) { $0 + $1.total }
-        }
-        
-        return bill
-        
+        people.reduce(0) { $0 + $1.total } // Only sum people's items here
     }
     
     var tipAmount: Double {
         if tipPercentageUse {
-            return totalAmountPreTip * tipPercentage / 100
+            var miscAmountDouble: Double = miscAmounts.reduce(0, +)
+            return (totalAmountPreTip + miscAmountDouble) * (tipPercentage / 100)
         } else {
             return Double(customTipAmount) ?? 0
         }
@@ -166,10 +203,20 @@ struct DetailedView : View {
         return ratio
     }
     
-    var totalAmount: Double {
-        return totalAmountPreTip + tipAmount
+    func finalAmount(for person: Person) -> Double {
+        let ratio = tipShare(for: person)
+        let personTip = tipAmount * ratio
+        let personTax = (Double(taxAmount) ?? 0) * ratio
+        let personMisc = miscAmounts.reduce(0, +) * ratio
+        
+        return person.total + personTip + personTax + personMisc
     }
     
+    var totalAmount: Double {
+        let taxAmountDouble = Double(taxAmount) ?? 0
+        let miscTotal = miscAmounts.reduce(0, +)
+        return totalAmountPreTip + tipAmount + taxAmountDouble + miscTotal
+    }
     
     var body: some View {
         Form {
@@ -193,8 +240,20 @@ struct DetailedView : View {
             ForEach(people.indices, id: \.self) { i in
                 Section(header: Text(people[i].name)) {
                     HStack {
+                        Text("$")
                         TextField("Enter Amount", text: $people[i].amount)
                             .keyboardType(.decimalPad)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                    Spacer() // Flexble space before the button, pushes it to the right
+                                    Button("Done") {
+                                        UIApplication.shared.sendAction( // Sending the action to the UI
+                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                            to: nil, from: nil, for: nil // Send to any object that can respond
+                                        )
+                                    }
+                                }
+                            }
                         Button(action: {
                             guard !people[i].amount.isEmpty else { return }
                             if let value = Double(people[i].amount) {
@@ -219,9 +278,69 @@ struct DetailedView : View {
                         people[i].amounts.remove(atOffsets: offsets)
                     }
                 }
-                                
+                
+            }.onDelete { offsets in
+                people.remove(atOffsets: offsets)
             }
             
+            Section(header: Text("Miscellanous")) {
+                HStack {
+                    Text("$")
+                    TextField("Enter Amount", text: $miscAmount)
+                        .keyboardType(.decimalPad)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                Spacer() // Flexble space before the button, pushes it to the right
+                                Button("Done") {
+                                    UIApplication.shared.sendAction( // Sending the action to the UI
+                                        #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                        to: nil, from: nil, for: nil // Send to any object that can respond
+                                    )
+                                }
+                            }
+                        }
+                    Button(action: {
+                        guard !miscAmount.isEmpty else { return }
+                        if let value = Double(miscAmount) {
+                            miscAmounts.append(value)
+                            miscAmount = ""
+                        }
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.blue)
+                    }
+                }
+                
+                ForEach(miscAmounts.indices, id: \.self) { i in
+                    HStack {
+                        Text("Misc \(i + 1)")
+                        Spacer()
+                        Text("$\(miscAmounts[i], specifier: "%.2f")")
+                    }
+                }.onDelete { offsets in
+                    miscAmounts.remove(atOffsets: offsets)
+                }
+            }
+            
+            Section(header: Text("Tax")) {
+                HStack {
+                    Text("$")
+                    TextField("Enter tax amount", text: $taxAmount)
+                        .keyboardType(.decimalPad)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                Spacer() // Flexble space before the button, pushes it to the right
+                                Button("Done") {
+                                    UIApplication.shared.sendAction( // Sending the action to the UI
+                                        #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                        to: nil, from: nil, for: nil // Send to any object that can respond
+                                    )
+                                }
+                            }
+                        }
+                }
+            }
+             
             Section(header: Text("Tip Amount")) {
                 Picker("Tip Type", selection: $tipPercentageUse) {
                     Text("Percentage").tag(true)
@@ -229,15 +348,32 @@ struct DetailedView : View {
                 }
                 
                 if tipPercentageUse {
-                    HStack {
-                        Text("Tip: \(Int(tipPercentage))%")
-                        Slider(value: $tipPercentage, in: 0...30, step: 1)
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Tip: \(Int(tipPercentage))%")
+                            Slider(value: $tipPercentage, in: 0...30, step: 1)
+                        }
+                        Text("Tip Amount: $\(tipAmount, specifier: "%.2f")")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
+                    .padding(.vertical)
                 } else {
                     HStack{
                         Text("$")
                         TextField("Enter custom tip", text: $customTipAmount)
                             .keyboardType(.decimalPad)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                                    Spacer() // Flexble space before the button, pushes it to the right
+                                    Button("Done") {
+                                        UIApplication.shared.sendAction( // Sending the action to the UI
+                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                                            to: nil, from: nil, for: nil // Send to any object that can respond
+                                        )
+                                    }
+                                }
+                            }
                     }
                 }
             }
@@ -245,15 +381,15 @@ struct DetailedView : View {
             Section(header: Text("Bill Total and Splits")) {
                 Text("Total: $\(totalAmount, specifier:"%.2f")")
                 
-                ForEach(people.indices, id:\.self) { i in
-                    let tipRatio: Double = tipShare(for: people[i])
-                    let personSplit: Double = (tipAmount * tipRatio) + people[i].total
+                ForEach(people.indices, id: \.self) { i in
+                    let personSplit = finalAmount(for: people[i])
                     Text("\(people[i].name): $\(personSplit, specifier: "%.2f")")
-                    
+                        .font(.headline)
+                        .foregroundColor(.blue)
                 }
             }
         }
-        }
+    }
         
     }
     
