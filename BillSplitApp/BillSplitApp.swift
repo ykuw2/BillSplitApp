@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct BillSplitApp: App {
+struct BillSplitterApp: App {
     var body: some Scene {
         WindowGroup {
-            AppView() 
+            AppView()
         }
     }
 }

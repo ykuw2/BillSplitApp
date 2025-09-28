@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		F88164EE2E79403300DB90F5 /* BillSplitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BillSplitApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F88164EE2E79403300DB90F5 /* BillSplitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = BillSplitApp.app; path = "/Users/yukikuwahara/Desktop/BillSplitApp/build/Debug-iphoneos/BillSplitApp.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				F88164F02E79403300DB90F5 /* BillSplitApp */,
-				F88164EF2E79403300DB90F5 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		F88164EF2E79403300DB90F5 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F88164EE2E79403300DB90F5 /* BillSplitApp.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,7 +86,7 @@
 			mainGroup = F88164E52E79403200DB90F5;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = F88164EF2E79403300DB90F5 /* Products */;
+			productRefGroup = F88164E52E79403200DB90F5;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
