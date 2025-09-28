@@ -71,7 +71,7 @@ struct EqualView: View {
                     }.padding(.vertical)
                     
                     // The $billAmount here creates a binding effect to the @State so whenever
-                    // a user inputs an amount it will update in the UI)'
+                    // a user inputs an amount it will update in the UI)
                     Picker("Tip Type", selection: $tipPercentageUse) {
                         Text("Percentage").tag(true)
                         Text("Custom Amount").tag(false)
@@ -335,6 +335,47 @@ struct DetailedView : View {
     }
         
     }
+
+// WelcomeView - the view that plays when user first opens the app
+struct WelcomeView: View {
+    var body: some View {
+        VStack {
+            Image("AppIcon")
+                .font(.system(size: 80))
+            
+            Text("Bill Splitter")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding(.top, 20)
+            
+            Text("Welcome")
+                .font(.title2)
+                .foregroundColor(.secondary)
+        }
+        .background(Color(.systemBackground))
+    }
+}
+
+// Main app controller
+struct AppView: View {
+    @State private var showSplash = true
+    
+    var body: some View {
+        if showSplash {
+            WelcomeView()
+                .onAppear { // Modifier that runs code when this view appears on the screen
+                    // Wait 2 seconds then transition
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { // DispatchQueue schedules a closure to run after a delay
+                        withAnimation(.easeInOut(duration: 0.5)) { // Run a smooth transition animation of 0.5 seconds
+                            showSplash = false // Set to false to go to the main app
+                        }
+                    }
+                }
+        } else {
+            ContentView() 
+        }
+    }
+}
     
 #Preview {
     ContentView()
