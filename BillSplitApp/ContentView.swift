@@ -68,36 +68,7 @@ struct EqualView: View {
                         Text("Total: $")
                         TextField("Enter total bill amount", text: $billAmount)
                             .keyboardType(.decimalPad)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                    Spacer() // Flexble space before the button, pushes it to the right
-                                    Button("Done") {
-                                        UIApplication.shared.sendAction( // Sending the action to the UI
-                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                            to: nil, from: nil, for: nil // Send to any object that can respond
-                                        )
-                                    }
-                                }
-                            }
                     }.padding(.vertical)
-                    
-                    HStack {
-                        Text("Tax: $")
-                        TextField("Enter tax amount", text: $taxAmount)
-                            .keyboardType(.decimalPad)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                    Spacer() // Flexble space before the button, pushes it to the right
-                                    Button("Done") {
-                                        UIApplication.shared.sendAction( // Sending the action to the UI
-                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                            to: nil, from: nil, for: nil // Send to any object that can respond
-                                        )
-                                    }
-                                }
-                            }
-                    }
-                    .padding(.vertical)
                     
                     // The $billAmount here creates a binding effect to the @State so whenever
                     // a user inputs an amount it will update in the UI)'
@@ -108,6 +79,12 @@ struct EqualView: View {
                     .padding(.vertical)
                     
                     if tipPercentageUse {
+                        HStack {
+                            Text("Tax: $")
+                            TextField("Enter to exclude from calculation", text: $taxAmount)
+                                .keyboardType(.decimalPad)
+                        }
+                        .padding(.vertical)
                         VStack(alignment: .leading) {
                             HStack {
                                 Text("Tip: \(Int(tipPercentage))%")
@@ -123,17 +100,6 @@ struct EqualView: View {
                             Text("Tip: $")
                             TextField("Enter custom tip", text: $customTipAmount)
                                 .keyboardType(.decimalPad)
-                                .toolbar {
-                                    ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                        Spacer() // Flexble space before the button, pushes it to the right
-                                        Button("Done") {
-                                            UIApplication.shared.sendAction( // Sending the action to the UI
-                                                #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                                to: nil, from: nil, for: nil // Send to any object that can respond
-                                            )
-                                        }
-                                    }
-                                }
                         }
                         .padding(.vertical)
                     }
@@ -152,6 +118,17 @@ struct EqualView: View {
                 }
             }
             .scrollDisabled(true)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
+                    Spacer() // Flexble space before the button, pushes it to the right
+                    Button("Done") {
+                        UIApplication.shared.sendAction( // Sending the action to the UI
+                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
+                            to: nil, from: nil, for: nil // Send to any object that can respond
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -188,7 +165,7 @@ struct DetailedView : View {
     
     var tipAmount: Double {
         if tipPercentageUse {
-            var miscAmountDouble: Double = miscAmounts.reduce(0, +)
+            let miscAmountDouble: Double = miscAmounts.reduce(0, +)
             return (totalAmountPreTip + miscAmountDouble) * (tipPercentage / 100)
         } else {
             return Double(customTipAmount) ?? 0
@@ -243,17 +220,6 @@ struct DetailedView : View {
                         Text("$")
                         TextField("Enter Amount", text: $people[i].amount)
                             .keyboardType(.decimalPad)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                    Spacer() // Flexble space before the button, pushes it to the right
-                                    Button("Done") {
-                                        UIApplication.shared.sendAction( // Sending the action to the UI
-                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                            to: nil, from: nil, for: nil // Send to any object that can respond
-                                        )
-                                    }
-                                }
-                            }
                         Button(action: {
                             guard !people[i].amount.isEmpty else { return }
                             if let value = Double(people[i].amount) {
@@ -288,17 +254,6 @@ struct DetailedView : View {
                     Text("$")
                     TextField("Enter Amount", text: $miscAmount)
                         .keyboardType(.decimalPad)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                Spacer() // Flexble space before the button, pushes it to the right
-                                Button("Done") {
-                                    UIApplication.shared.sendAction( // Sending the action to the UI
-                                        #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                        to: nil, from: nil, for: nil // Send to any object that can respond
-                                    )
-                                }
-                            }
-                        }
                     Button(action: {
                         guard !miscAmount.isEmpty else { return }
                         if let value = Double(miscAmount) {
@@ -327,17 +282,6 @@ struct DetailedView : View {
                     Text("$")
                     TextField("Enter tax amount", text: $taxAmount)
                         .keyboardType(.decimalPad)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                Spacer() // Flexble space before the button, pushes it to the right
-                                Button("Done") {
-                                    UIApplication.shared.sendAction( // Sending the action to the UI
-                                        #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                        to: nil, from: nil, for: nil // Send to any object that can respond
-                                    )
-                                }
-                            }
-                        }
                 }
             }
              
@@ -363,17 +307,6 @@ struct DetailedView : View {
                         Text("$")
                         TextField("Enter custom tip", text: $customTipAmount)
                             .keyboardType(.decimalPad)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) { // Place it on keyboard
-                                    Spacer() // Flexble space before the button, pushes it to the right
-                                    Button("Done") {
-                                        UIApplication.shared.sendAction( // Sending the action to the UI
-                                            #selector(UIResponder.resignFirstResponder), // Resign the first responder - the text field
-                                            to: nil, from: nil, for: nil // Send to any object that can respond
-                                        )
-                                    }
-                                }
-                            }
                     }
                 }
             }
@@ -386,6 +319,16 @@ struct DetailedView : View {
                     Text("\(people[i].name): $\(personSplit, specifier: "%.2f")")
                         .font(.headline)
                         .foregroundColor(.blue)
+                }
+            }
+        }.toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil, from: nil, for: nil
+                    )
                 }
             }
         }
