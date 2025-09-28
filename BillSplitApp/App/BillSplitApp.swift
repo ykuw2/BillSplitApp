@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct BillSplitterApp: App {
+struct BillSplitApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()

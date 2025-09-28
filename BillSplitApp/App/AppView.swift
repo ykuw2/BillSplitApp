@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AppView: View {
-    @State private var showSplash = true
+    @State private var showSplash: Bool = true
     
     var body: some View {
         if showSplash {

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		F88164EE2E79403300DB90F5 /* BillSplitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = BillSplitApp.app; path = "/Users/yukikuwahara/Desktop/BillSplitApp/build/Debug-iphoneos/BillSplitApp.app"; sourceTree = "<absolute>"; };
+		F88165352E89D52400DB90F5 /* BillSplitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = BillSplitApp.app; path = "/Users/yukikuwahara/Desktop/BillSplitApp/build/Debug-iphoneos/BillSplitApp.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -58,7 +58,7 @@
 			packageProductDependencies = (
 			);
 			productName = BillSplitApp;
-			productReference = F88164EE2E79403300DB90F5 /* BillSplitApp.app */;
+			productReference = F88165352E89D52400DB90F5 /* BillSplitApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
