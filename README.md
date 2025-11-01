@@ -4,6 +4,8 @@ I wanted to create a simple app that solves a problem whenever my friends and I 
 We always would have to pull out the calculator app and manually type in the numbers and do calculations that can be easily mixed up and leading to inaccurate splits.
 I figured that since I learned more topics and structural pattern of how iOS apps should be created and organized, why not give it a shot to create an app that solves this issue.
 
+This will be my first iOS App that I create. I know this app will not be the best, but it is a start of a journey.
+
 ## The App
 
 ### The App Icon
